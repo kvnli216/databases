@@ -1,68 +1,131 @@
-var db = require('../db');
+// var db = require('../db');
 var Promise = require('bluebird');
 const mysql = require('mysql'); // added access to mysql module **************
+var Sequelize = require('sequelize');
+var db = new Sequelize('chat', 'student', 'student', {
+  host: 'localhost'
+  // maybe need port number?
+});
 
-// var queryString = 'SELECT * FROM messages';
+var User = db.define('User', {
+  id: {
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  username: Sequelize.STRING,
+  createdAt: Sequelize.DATE,
+  updatedAt: Sequelize.DATE
+});
 
-// let getConnect = db.query(queryString, function (err, result, fields) {
-//   if (err) { throw err }
-//   console.log(result);
-// });
-// let getConnectAsync = Promise.promisify(getConnect);
+var Message = db.define('Message', {
+  id: {
+    primaryKey: true,
+    type: Sequelize.INTEGER
+  },
+  username: Sequelize.STRING,
+  message: Sequelize.STRING,
+  roomname: Sequelize.STRING,
+  createdAt: Sequelize.DATE,
+  updatedAt: Sequelize.DATE
+});
 
 module.exports = {
   messages: {
     get: function (callback) {
-      let queryString = 'SELECT * FROM messages';
-      db.query(queryString, function (err, result) {
-        if (err) {
-          // console.log(err, 'err');
-          console.log(err);
-        } else {
-          console.log(result, 'results');
-          callback(err, result);
-        }
-      });
+      Message.findAll({ include: [{ model: User }] })
+        .then(function (theMessage) {
+          console.log(theMessage, 'from message get');
+          callback(null, theMessage);
+        })
+        .catch(function (err) {
+          callback(err);
+        });
     },
-    // a function which produces all the messages
     post: function (requestBody, callback) {
-      console.log('poo');
       // debugger;
-      let queryString = `INSERT INTO messages(username, message, roomname) VALUES("${requestBody.username}","${requestBody.message}","${requestBody.roomname}")`;
-      console.log(requestBody, 'reqb');
-      db.query(queryString, function (err, result) {
-        if (err) { throw err; }
-        // debugger;
-        console.log('results');
-        callback(err, result);
-      });
-    } // a function which can be used to insert a message into the database
+      Message.create({
+        username: requestBody.username, message: requestBody.message,
+        roomname: requestBody.roomname
+      })
+        .then(function (theMessage) {
+          console.log(theMessage, 'MESSAGE post success!');
+          callback(null, theMessage);
+        })
+        .catch(err => {
+          console.log('MESSAGE post ERR!');
+          callback(err);
+        });
+    }
   },
-
   users: {
-    // Ditto as above.
     get: function (callback) {
-      let queryString = 'SELECT * FROM messages';
-      db.query(queryString, function (err, result) {
-        if (err) {
-          // console.log(err, 'err');
-          console.log(err);
-        } else {
-          console.log(result, 'results');
-          callback(err, result);
-        }
-      });
+      User.findAll()
+        .then(function (theUser) {
+          callback(null, theUser);
+        })
+        .catch(function (err) {
+          callback(err);
+        });
     },
     post: function (requestBody, callback) {
-      let queryString = `INSERT INTO users(username) VALUES('${requestBody.username}')`;
-      console.log(requestBody, 'reqb');
-      db.query(queryString, function (err, result) {
-        if (err) { throw err; }
-        console.log('results');
-        callback(err, result);
-      });
-    } // a function which can be used to insert a message into the database
+      User.create({ username: requestBody.username })
+        .then(function (theUser) {
+          console.log('user post success!');
+          callback(null, theUser);
+        })
+        .catch(function (err) {
+          console.log('user post ERR!');
+          callback(err);
+        });
+    }
+
   }
 };
 
-// export default models;
+
+
+
+
+// module.exports = {
+//   messages: {
+//     get: function (callback) {
+//       let queryString = 'SELECT * FROM messages';
+//       db.query(queryString, function (err, result) {
+//         if (err) {
+//           throw err;
+//         } else {
+//           callback(err, result);
+//         }
+//       });
+//     },
+//     // a function which produces all the messages
+//     post: function (requestBody, callback) {
+//       let queryString = `INSERT INTO messages(username, message, roomname) VALUES("${requestBody.username}","${requestBody.message}","${requestBody.roomname}")`;
+//       db.query(queryString, function (err, result) {
+//         if (err) { throw err; }
+//         callback(err, result);
+//       });
+//     } // a function which can be used to insert a message into the database
+//   },
+
+//   users: {
+//     // Ditto as above.
+//     get: function (callback) {
+//       let queryString = 'SELECT * FROM users';
+//       db.query(queryString, function (err, result) {
+//         if (err) {
+//           throw err;
+//         } else {
+//           callback(err, result);
+//         }
+//       });
+//     },
+//     post: function (requestBody, callback) {
+//       let queryString = `INSERT INTO users(username) VALUES('${requestBody.username}')`;
+//       db.query(queryString, function (err, result) {
+//         if (err) { throw err; }
+//         callback(err, result);
+//       });
+//     } // a function which can be used to insert a message into the database
+//   }
+// };
