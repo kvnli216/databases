@@ -2,25 +2,29 @@ CREATE DATABASE chat;
 
 USE chat;
 
-CREATE TABLE roomname (
-  id INTEGER PRIMARY KEY auto_increment,
-  roomname TEXT NOT NULL
-);
+-- CREATE TABLE roomname (
+--   id INTEGER PRIMARY KEY auto_increment,
+--   roomname TEXT
+-- );
 
-CREATE TABLE friends (
+-- CREATE TABLE friends (
+--   id INTEGER PRIMARY KEY auto_increment,
+--   username TEXT
+-- );
+CREATE TABLE users (
   id INTEGER PRIMARY KEY auto_increment,
-  username TEXT NOT NULL
+  username TEXT
 );
 
 CREATE TABLE messages (
   id INTEGER PRIMARY KEY auto_increment,
-  username TEXT NOT NULL,
+  username TEXT,
   createdAt DATETIME,
-  text TEXT NOT NULL,
-  roomname INTEGER,
-  friends INTEGER,
-  FOREIGN KEY(roomname) REFERENCES roomname(id),
-  FOREIGN KEY(friends) REFERENCES friends(id)
+  message TEXT,
+  roomname TEXT
+  -- friends INTEGER,
+  -- FOREIGN KEY(roomname) REFERENCES roomname(id),
+  -- FOREIGN KEY(friends) REFERENCES friends(id)
 );
 
 /*  Execute this file from the command line by typing:
